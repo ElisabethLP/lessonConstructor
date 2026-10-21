@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конструктор Урока</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2350a3a2'/><text x='50' y='55' font-family='sans-serif' font-size='60' font-weight='bold' fill='white' text-anchor='middle' dominant-baseline='middle'>К</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Конструктор Урока</h1>
+        <button id="theme-toggle" title="Переключить тему">🌙</button>
+    </header>
+
+    <main>
+        <!-- ========== ГЕНЕРАЦИЯ ========== -->
+        <section id="generator-section">
+            <button id="generate-button">Создать структуру урока</button>
+            <div id="loader" style="display: none;">
+                <div class="spinner"></div>
+                <p>Загрузка приёмов...</p>
+            </div>
+            <div id="lesson-structure-container"></div>
+            <div id="result-actions" style="display: none;">
+                <button id="copy-button">📋 Копировать</button>
+                <button id="regenerate-button">🎲 Сгенерировать заново</button>
+                <p class="hint">Не подошло? Попробовать снова</p>
+            </div>
+        </section>
+
+        <!-- ========== ВСЕ ПРИЁМЫ ========== -->
+        <section id="all-techniques-section">
+            <h2>Все приёмы</h2>
+            <p id="techniques-count" class="techniques-count"></p>
+
+            <div class="filters">
+                <button class="filter-btn active" data-category="all">Все</button>
+                <button class="filter-btn" data-category="актуализация">Актуализация</button>
+                <button class="filter-btn" data-category="основной этап">Основной этап</button>
+                <button class="filter-btn" data-category="закрепление">Закрепление</button>
+                <button class="filter-btn" data-category="физкультминутка">Физкультминутка</button>
+                <button class="filter-btn" data-category="рефлексия">Рефлексия</button>
+            </div>
+
+            <button id="show-all-button">Показать все приёмы</button>
+            <div id="close-list-wrapper" style="display: none;">
+                <button id="hide-all-button">↑ Скрыть список</button>
+            </div>
+            <div id="all-techniques-container" style="display: none;"></div>
+        </section>
+
+        <!-- ========== ДОБАВЛЕНИЕ ========== -->
+        <section id="add-technique-section">
+            <h2>Добавить свой приём</h2>
+            <button id="show-add-form-button">Добавить новый приём</button>
+
+            <form id="add-technique-form" style="display: none;">
+                <label for="technique-name">Название приёма:</label>
+                <input type="text" id="technique-name" required placeholder="Например: Кластер">
+
+                <label for="technique-category">Категория:</label>
+                <select id="technique-category" required>
+                    <option value="">— Выберите категорию —</option>
+                    <option value="актуализация">Актуализация</option>
+                    <option value="основной этап">Основной этап</option>
+                    <option value="закрепление">Закрепление</option>
+                    <option value="физкультминутка">Физкультминутка</option>
+                    <option value="рефлексия">Рефлексия</option>
+                </select>
+
+                <label for="technique-description">Краткое описание:</label>
+                <textarea id="technique-description" placeholder="Коротко опишите суть приёма."></textarea>
+
+                <label for="technique-details">Подробное описание (необязательно):</label>
+                <textarea id="technique-details" placeholder="Как именно проводить приём?"></textarea>
+
+                <label for="technique-link">Ссылка на материал (необязательно):</label>
+                <input type="url" id="technique-link" placeholder="https://...">
+
+                <div style="margin-top: 20px;">
+                    <button type="submit">Сохранить приём</button>
+                    <button type="button" id="cancel-add-button">Отмена</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p class="school-name">МОУ «Киришская средняя общеобразовательная школа №8»</p>
+        <p>© 2026 Индивидуальный проект Ложичевой Е.П.</p>
+    </footer>
+
+    <div id="toast-container"></div>
+    <script src="script.js"></script>
+</body>
+</html>
