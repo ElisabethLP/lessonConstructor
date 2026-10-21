@@ -1,18 +1,11 @@
 // ========== НАСТРОЙКИ ==========
-// ВАШ НОВЫЙ СЕРВЕР ONREZA:
 const API_URL = "https://lessonconstructor-krasnopolii-xckr.onreza.app/techniques";
 const ADMIN_PASSWORD = "88888888";
-
-// ========== БАЗОВЫЕ ПРИЁМЫ (на случай, если база пуста) ==========
-const DEFAULT_TECHNIQUES = [
-    { base: true, name: "Мозговой штурм", category: "актуализация", description: "Генерация идей за короткое время, без критики.", details: "Учитель задает тему. Ученики по очереди называют любые идеи...", link: "", rating: 0, votes: 0 },
-    // ... (здесь остальные 19 приёмов, они не нужны, так как база уже создана, 
-    // но пусть будут для подстраховки. Вы можете оставить свой старый список).
-];
 
 let allTechniques = [];
 let lastGenerated = [];
 let currentFilter = "all";
+let sortByRating = false; // Флаг сортировки по рейтингу
 
 // ========== УВЕДОМЛЕНИЯ ==========
 function showToast(message, type = "success") {
@@ -54,7 +47,6 @@ async function loadTechniques() {
         if (!response.ok) throw new Error("Ошибка сети");
         let loaded = await response.json();
 
-        // Если база пуста, показываем сообщение
         if (!Array.isArray(loaded) || loaded.length === 0) {
             allTechniques = [];
             showToast("База пуста. Добавьте первый приём!", "success");
@@ -128,7 +120,7 @@ function generateLessonStructure() {
     document.getElementById("result-actions").style.display = "flex";
 }
 
-// ========== ОТОБРАЖЕНИЕ (с рейтингом) ==========
+// ========== ОТОБРАЖЕНИЕ ==========
 function displayLessonStructure(techniques) {
     const container = document.getElementById("lesson-structure-container");
     container.innerHTML = "";
@@ -165,6 +157,10 @@ function displayAllTechniques() {
     let list = allTechniques;
     if (currentFilter !== "all") list = allTechniques.filter(t => t.category === currentFilter);
 
+    if (sortByRating) {
+        list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    }
+
     if (list.length === 0) {
         container.innerHTML = "<p>В этой категории пока нет приёмов.</p>";
         return;
@@ -173,7 +169,9 @@ function displayAllTechniques() {
     const ul = document.createElement("ul");
     list.forEach((tech) => {
         const li = document.createElement("li");
-        let ratingHTML = (tech.votes > 0) ? `<span class="rating-badge">★ ${Number(tech.rating).toFixed(1)}</span>` : `<span class="rating-badge" style="opacity:0.6">Пока нет оценок</span>`;
+        let ratingHTML = (tech.votes > 0) 
+            ? `<span class="rating-badge">★ ${Number(tech.rating).toFixed(1)}</span>` 
+            : `<span class="rating-badge" style="opacity:0.6">Пока нет оценок</span>`;
 
         li.innerHTML = `
             <div class="tech-header">
@@ -247,7 +245,7 @@ async function rateTechnique(id, score) {
     }
 }
 
-// ========== ВСПОМОГАТЕЛЬНЫЕ ==========
+// ========== ДЕЙСТВИЯ ==========
 function capitalize(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1) : ""; }
 function plural(n, forms) {
     const mod10 = n % 10, mod100 = n % 100;
@@ -288,7 +286,16 @@ function hideAllTechniques() {
 }
 function setFilter(category) {
     currentFilter = category;
-    document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.category === category));
+    sortByRating = false; // Сбрасываем сортировку при выборе категории
+    document.getElementById("sort-by-rating").classList.remove("active");
+    document.querySelectorAll(".filter-btn").forEach(btn => {
+        if(btn.id !== "sort-by-rating") btn.classList.toggle("active", btn.dataset.category === category);
+    });
+    if (document.getElementById("all-techniques-container").style.display === "block") displayAllTechniques();
+}
+function toggleSortByRating() {
+    sortByRating = !sortByRating;
+    document.getElementById("sort-by-rating").classList.toggle("active", sortByRating);
     if (document.getElementById("all-techniques-container").style.display === "block") displayAllTechniques();
 }
 async function handleDeleteTechnique(event) {
@@ -330,7 +337,7 @@ async function handleAddTechnique(event) {
     if (!category) return showToast("Выберите категорию.", "error");
 
     const newTech = {
-        id: Date.now().toString(), // Генерируем ID как строку для Postgres
+        id: Date.now().toString(),
         name: name, category: category, description: description, details: details, link: link, base: false
     };
 
@@ -353,6 +360,8 @@ function isLowPowerDevice() {
     const memory = navigator.deviceMemory || 4;
     return (cores <= 2 || memory <= 2 || window.innerWidth < 360);
 }
+
+// ========== ЗАПУСК ==========
 document.addEventListener("DOMContentLoaded", async () => {
     initTheme();
     document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
@@ -368,8 +377,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("show-add-form-button").addEventListener("click", () => toggleAddForm(true));
     document.getElementById("cancel-add-button").addEventListener("click", () => toggleAddForm(false));
     document.getElementById("add-technique-form").addEventListener("submit", handleAddTechnique);
+    document.getElementById("sort-by-rating").addEventListener("click", toggleSortByRating);
 
     document.querySelectorAll(".filter-btn").forEach(btn => {
-        btn.addEventListener("click", () => setFilter(btn.dataset.category));
+        if (btn.id !== "sort-by-rating") {
+            btn.addEventListener("click", () => setFilter(btn.dataset.category));
+        }
     });
 });

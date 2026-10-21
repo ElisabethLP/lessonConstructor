@@ -70,8 +70,8 @@ button:active { transform: translateY(1px) scale(0.98); box-shadow: 0 1px 3px rg
 #result-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
 #copy-button { background: var(--header-bg); color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; }
 #copy-button:hover { filter: brightness(0.9); }
-#regenerate-button { background: #f0ad4e; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; }
-#regenerate-button:hover { filter: brightness(0.9); }
+#regenerate-button { background: #4a90e2; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; transition: background-color 0.3s ease, transform 0.15s ease; }
+#regenerate-button:hover { background: #357abd; transform: translateY(-2px); }
 .hint { font-size: 0.9em; color: var(--footer-text); margin: 8px 0 0; flex-basis: 100%; text-align: center; }
 
 /* ========== ПОДРОБНОЕ ОПИСАНИЕ ========== */
@@ -87,6 +87,9 @@ button:active { transform: translateY(1px) scale(0.98); box-shadow: 0 1px 3px rg
 .filter-btn { background: var(--btn-secondary-bg); color: var(--btn-secondary-text); padding: 6px 14px; border: none; border-radius: 20px; cursor: pointer; font-size: 0.9em; }
 .filter-btn:hover { background: var(--btn-secondary-hover); }
 .filter-btn.active { background: var(--header-bg); color: #fff; }
+
+/* ========== СОРТИРОВКА ========== */
+.sort-btn.active { background: #f0ad4e; color: #fff; }
 
 /* ========== КАТЕГОРИИ ========== */
 .category-tag { display: inline-block; background: var(--header-bg); color: #fff; font-size: 0.75em; padding: 2px 8px; border-radius: 12px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
