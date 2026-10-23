@@ -5,7 +5,8 @@ const ADMIN_PASSWORD = "88888888";
 let allTechniques = [];
 let lastGenerated = [];
 let currentFilter = "all";
-let sortByRating = false; // Флаг сортировки по рейтингу
+let sortByRating = false;
+let searchQuery = ""; 
 
 // ========== УВЕДОМЛЕНИЯ ==========
 function showToast(message, type = "success") {
@@ -75,7 +76,7 @@ async function loadTechniques() {
     }
 }
 
-// ========== ГЕНЕРАЦИЯ (с рейтингом) ==========
+// ========== ГЕНЕРАЦИЯ ==========
 function getWeightedRandomTechnique(pool) {
     const getWeight = (tech) => {
         const effectiveRating = (tech.votes || 0) < 3 ? 2.5 : (tech.rating || 0);
@@ -120,7 +121,7 @@ function generateLessonStructure() {
     document.getElementById("result-actions").style.display = "flex";
 }
 
-// ========== ОТОБРАЖЕНИЕ ==========
+// ========== ОТОБРАЖЕНИЕ СГЕНЕРИРОВАННОГО УРОКА ==========
 function displayLessonStructure(techniques) {
     const container = document.getElementById("lesson-structure-container");
     container.innerHTML = "";
@@ -129,40 +130,54 @@ function displayLessonStructure(techniques) {
     const ul = document.createElement("ul");
     techniques.forEach((tech, index) => {
         const li = document.createElement("li");
+        
+        // Генерируем скрытый блок с деталями для урока
         let detailsHTML = "";
         if (tech.details || tech.link) {
             let linkHTML = tech.link ? `<a href="${tech.link}" target="_blank" class="btn-resource-link">🔗 Полезный материал</a>` : "";
-            detailsHTML = `<div class="tech-details-block" id="details-${tech.id}"><p>${tech.details || ""}</p>${linkHTML}</div>`;
+            detailsHTML = `<div class="tech-details-block" id="lesson-details-${tech.id}"><p>${tech.details || ""}</p>${linkHTML}</div>`;
         }
-        let toggleBtn = (tech.details || tech.link) ? `<button class="btn-toggle-details" onclick="toggleDetails('${tech.id}', this)">Подробнее ▾</button>` : "";
-        li.innerHTML = `<span class="category-tag">${capitalize(tech.category)}</span><strong>${index + 1}. ${tech.name}</strong><div>${tech.description || "Нет описания"}</div>${toggleBtn}${detailsHTML}`;
+        let toggleBtn = (tech.details || tech.link) 
+            ? `<button class="btn-toggle-details" onclick="toggleDetails('lesson-details-${tech.id}', this)">Подробнее ▾</button>` 
+            : "";
+
+        li.innerHTML = `
+            <span class="category-tag">${capitalize(tech.category)}</span>
+            <strong>${index + 1}. ${tech.name}</strong>
+            <div>${tech.description || "Нет описания"}</div>
+            ${toggleBtn}
+            ${detailsHTML}
+        `;
         ul.appendChild(li);
     });
     container.appendChild(ul);
 }
 
-window.toggleDetails = function(id, btn) {
-    const block = document.getElementById(`details-${id}`);
-    if (block) {
-        block.classList.toggle("active");
-        btn.textContent = block.classList.contains("active") ? "Скрыть ▴" : "Подробнее ▾";
-    }
-}
-
+// ========== ОТОБРАЖЕНИЕ ВСЕХ ПРИЁМОВ (с деталями) ==========
 function displayAllTechniques() {
     const container = document.getElementById("all-techniques-container");
     container.style.display = "block";
     container.innerHTML = "";
 
     let list = allTechniques;
-    if (currentFilter !== "all") list = allTechniques.filter(t => t.category === currentFilter);
+    
+    if (currentFilter !== "all") list = list.filter(t => t.category === currentFilter);
+
+    if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        list = list.filter(t => 
+            t.name.toLowerCase().includes(q) || 
+            t.description.toLowerCase().includes(q) || 
+            t.category.toLowerCase().includes(q)
+        );
+    }
 
     if (sortByRating) {
         list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     }
 
     if (list.length === 0) {
-        container.innerHTML = "<p>В этой категории пока нет приёмов.</p>";
+        container.innerHTML = "<p>По вашему запросу ничего не найдено.</p>";
         return;
     }
 
@@ -172,6 +187,16 @@ function displayAllTechniques() {
         let ratingHTML = (tech.votes > 0) 
             ? `<span class="rating-badge">★ ${Number(tech.rating).toFixed(1)}</span>` 
             : `<span class="rating-badge" style="opacity:0.6">Пока нет оценок</span>`;
+
+        // Генерируем скрытый блок с деталями для общего списка
+        let detailsHTML = "";
+        if (tech.details || tech.link) {
+            let linkHTML = tech.link ? `<a href="${tech.link}" target="_blank" class="btn-resource-link">🔗 Полезный материал</a>` : "";
+            detailsHTML = `<div class="tech-details-block" id="all-details-${tech.id}"><p>${tech.details || ""}</p>${linkHTML}</div>`;
+        }
+        let toggleBtn = (tech.details || tech.link) 
+            ? `<button class="btn-toggle-details" onclick="toggleDetails('all-details-${tech.id}', this)">Подробнее ▾</button>` 
+            : "";
 
         li.innerHTML = `
             <div class="tech-header">
@@ -185,6 +210,11 @@ function displayAllTechniques() {
                 </div>
             </div>
             <div>${tech.description || "Нет описания"}</div>
+            
+            <!-- НОВОЕ: Кнопка "Подробнее" и скрытый блок -->
+            ${toggleBtn}
+            ${detailsHTML}
+
             <div class="stars" data-id="${tech.id}">
                 <span class="star" data-score="1">★</span><span class="star" data-score="2">★</span><span class="star" data-score="3">★</span><span class="star" data-score="4">★</span><span class="star" data-score="5">★</span>
             </div>
@@ -211,6 +241,15 @@ function displayAllTechniques() {
     });
     container.appendChild(ul);
     document.querySelectorAll(".delete-btn").forEach(btn => btn.addEventListener("click", handleDeleteTechnique));
+}
+
+// ========== УНИВЕРСАЛЬНАЯ ФУНКЦИЯ РАСКРЫТИЯ ==========
+window.toggleDetails = function(id, btn) {
+    const block = document.getElementById(id);
+    if (block) {
+        block.classList.toggle("active");
+        btn.textContent = block.classList.contains("active") ? "Скрыть ▴" : "Подробнее ▾";
+    }
 }
 
 // ========== РЕЙТИНГ ==========
@@ -245,7 +284,7 @@ async function rateTechnique(id, score) {
     }
 }
 
-// ========== ДЕЙСТВИЯ ==========
+// ========== ВСПОМОГАТЕЛЬНЫЕ ==========
 function capitalize(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1) : ""; }
 function plural(n, forms) {
     const mod10 = n % 10, mod100 = n % 100;
@@ -286,7 +325,7 @@ function hideAllTechniques() {
 }
 function setFilter(category) {
     currentFilter = category;
-    sortByRating = false; // Сбрасываем сортировку при выборе категории
+    sortByRating = false; 
     document.getElementById("sort-by-rating").classList.remove("active");
     document.querySelectorAll(".filter-btn").forEach(btn => {
         if(btn.id !== "sort-by-rating") btn.classList.toggle("active", btn.dataset.category === category);
@@ -378,6 +417,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("cancel-add-button").addEventListener("click", () => toggleAddForm(false));
     document.getElementById("add-technique-form").addEventListener("submit", handleAddTechnique);
     document.getElementById("sort-by-rating").addEventListener("click", toggleSortByRating);
+
+    document.getElementById("search-input").addEventListener("input", (e) => {
+        searchQuery = e.target.value;
+        if (document.getElementById("all-techniques-container").style.display === "block") {
+            displayAllTechniques();
+        }
+    });
 
     document.querySelectorAll(".filter-btn").forEach(btn => {
         if (btn.id !== "sort-by-rating") {

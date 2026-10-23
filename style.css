@@ -177,3 +177,32 @@ footer { text-align: center; margin-top: 30px; padding: 1rem 0; color: var(--foo
 body.reduced-motion #lesson-structure-container li, body.reduced-motion #all-techniques-container li { animation: fadeIn 0.15s ease-out; animation-delay: 0s !important; }
 body.reduced-motion button { transition: background-color 0.15s ease; transform: none !important; box-shadow: none !important; }
 body.reduced-motion .techniques-count.updated { animation: none; }
+/* ========== СТИЛИ ДЛЯ ПОИСКА ========== */
+.search-container {
+    max-width: 600px;
+    margin: 0 auto 20px;
+}
+
+#search-input {
+    width: 100%;
+    padding: 12px 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 30px;
+    font-size: 1em;
+    font-family: inherit;
+    background: var(--input-bg);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+#search-input:focus {
+    outline: none;
+    border-color: var(--header-bg);
+    box-shadow: 0 0 10px rgba(80, 163, 162, 0.2);
+}
+
+#search-input::placeholder {
+    color: var(--footer-text);
+    opacity: 0.7;
+}
